@@ -5,10 +5,20 @@ module LetsEncrypt
   module CertificateVerifiable
     extend ActiveSupport::Concern
 
-    # Returns true if verify domain is succeed.
+
     def verify
-      start_authorize
-      start_challenge
+      domains = [domain] + [alternative_names]
+      domains.each do |domain|
+        verify_domain(domain)
+      end
+      # Save this certificate
+      save!
+    end
+
+    # Returns true if verify domain is succeed.
+    def verify_domain(domain)
+      start_authorize(domain)
+      start_challenge(domain)
       wait_verify_status
       check_verify_status
     rescue Acme::Client::Error => e
@@ -17,15 +27,15 @@ module LetsEncrypt
 
     private
 
-    def start_authorize
+    def start_authorize(domain)
       authorization = LetsEncrypt.client.authorize(domain: domain)
+      clear_previous_verification_data
       @challenge = authorization.http01
-      self.verification_path = @challenge.filename
-      self.verification_string = @challenge.file_content
-      save!
+      connection = LetsEncrypt::Redis.connection
+      connection.set("verification_path.#{@challenge.filename}", @challenge.file_content)
     end
 
-    def start_challenge
+    def start_challenge(domain)
       logger.info "Attempting verification of #{domain}"
       @challenge.request_verification
     end
@@ -47,8 +57,15 @@ module LetsEncrypt
         logger.info "Status was not valid (was: #{@challenge.verify_status})"
         return false
       end
-
+      # Clean verification data
+      clear_previous_verification_data
       true
+    end
+
+    def clear_previous_verification_data
+      return unless @challenge
+      connection = LetsEncrypt::Redis.connection
+      connection.del("verification_path.#{@challenge.filename}")
     end
 
     def retry_on_verify_error(e)
@@ -60,6 +77,7 @@ module LetsEncrypt
         verify
       else
         logger.info "Error: #{e.class} (#{e.message})"
+        clear_previous_verification_data
         return false
       end
     end

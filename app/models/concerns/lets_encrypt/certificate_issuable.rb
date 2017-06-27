@@ -24,20 +24,19 @@ module LetsEncrypt
       )
       private_key = OpenSSL::PKey::RSA.new(key)
       csr.public_key = private_key.public_key
-      attach_san(csr)
+      attach_san(csr) unless alternative_names.empty?
       csr.sign(private_key, OpenSSL::Digest::SHA256.new)
       csr
     end
 
     def attach_san(csr)
-      sans = alternative_names.split(",")
 
       exts = [
         [ "basicConstraints", "CA:FALSE", false ],
         [ "keyUsage", "Digital Signature, Non Repudiation, Key Encipherment", false],
       ]
 
-      sans.map! do |san|
+      sans = alternative_names.map do |san|
         san = "DNS:#{san}"
       end
 

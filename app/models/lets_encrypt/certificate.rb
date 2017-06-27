@@ -73,6 +73,10 @@ module LetsEncrypt
       LetsEncrypt::Redis.save(self)
     end
 
+    def all_domains
+      [domain] + alternative_names
+    end 
+
     protected
 
     def logger
