@@ -24,8 +24,38 @@ module LetsEncrypt
       )
       private_key = OpenSSL::PKey::RSA.new(key)
       csr.public_key = private_key.public_key
+      attach_san(csr)
       csr.sign(private_key, OpenSSL::Digest::SHA256.new)
       csr
+    end
+
+    def attach_san(csr)
+      sans = alternative_names.split(",")
+
+      exts = [
+        [ "basicConstraints", "CA:FALSE", false ],
+        [ "keyUsage", "Digital Signature, Non Repudiation, Key Encipherment", false],
+      ]
+
+      sans.map! do |san|
+        san = "DNS:#{san}"
+      end
+
+      exts << [ "subjectAltName", sans.join(','), false ]
+
+      ef = OpenSSL::X509::ExtensionFactory.new
+      exts = exts.map do |ext|
+        ef.create_extension(*ext)
+      end
+      attrval = OpenSSL::ASN1::Set([OpenSSL::ASN1::Sequence(exts)])
+      attrs = [
+        OpenSSL::X509::Attribute.new('extReq', attrval),
+        OpenSSL::X509::Attribute.new('msExtReq', attrval),
+      ]
+      attrs.each do |attr|
+        csr.add_attribute(attr)
+      end
+
     end
 
     def create_certificate
