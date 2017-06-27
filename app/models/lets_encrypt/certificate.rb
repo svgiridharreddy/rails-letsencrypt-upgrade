@@ -48,6 +48,10 @@ module LetsEncrypt
       Time.zone.now >= expires_at
     end
 
+    def valid?
+      self.verified && !expired?
+    end
+    
     # Returns true if success get a new certificate
     def get
       verify && issue
