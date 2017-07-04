@@ -9,7 +9,7 @@ class CreateLetsencryptCertificates < ActiveRecord::Migration<%= migration_versi
       t.text     :certificate, limit: 65535
       t.text     :intermediaries, limit: 65535
       t.text     :key, limit: 65535
-      t.boolean  :verified, default: false
+      t.integer  :status, default: 0
       t.datetime :expires_at
       t.datetime :renew_after
 

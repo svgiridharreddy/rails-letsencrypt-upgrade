@@ -25,36 +25,50 @@ module LetsEncrypt
   class Certificate < ActiveRecord::Base
     include CertificateVerifiable
     include CertificateIssuable
+    include CertificateStateMachineConcern
 
     validates :domain, presence: true, uniqueness: true
 
     scope :active, -> { where('certificate IS NOT NULL AND expires_at > ?', Time.zone.now) }
-    scope :renewable, -> { where('renew_after IS NULL OR renew_after <= ?', Time.zone.now) }
+    scope :renewable, -> { where('renew_after IS NULL OR renew_after <= ?', Time.zone.now).where(status: statuses['state_issued']) }
     scope :expired, -> { where('expires_at <= ?', Time.zone.now) }
 
     before_create -> { self.key = OpenSSL::PKey::RSA.new(4096).to_s }
     after_save -> { save_to_redis }, if: -> { LetsEncrypt.config.use_redis? }
-
-    # Returns false if certificate is not issued.
-    #
-    # This method didn't check certificate is valid,
-    # its only uses for checking is there has a certificate.
-    def active?
-      certificate.present?
-    end
-
+    
     # Returns true if certificate is expired.
     def expired?
       Time.zone.now >= expires_at
     end
 
-    def valid?
-      self.verified && !expired?
+    def active?
+      self.state_issued && !expired?
     end
-    
+
+    def verify!
+      self.state_reset
+      if verify
+        self.state_verify
+      else
+        logger.error "The certificate cannot be verified" 
+      end
+    end
+
+    def issue!
+      if self.state_verified?
+        if issue
+          self.state_issue
+        else
+          logger.error "The certificate cannot be issued"  
+        end
+      else
+        logger.error "The certificate must be vertified before issued"
+      end
+    end
+
     # Returns true if success get a new certificate
     def get
-      verify && issue
+      verify! && issue!
     end
 
     alias renew get

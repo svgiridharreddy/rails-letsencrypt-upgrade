@@ -10,12 +10,12 @@ RSpec.describe LetsEncrypt::Certificate do
     LetsEncrypt.config.save_to_redis = false
   end
 
-  describe '#active?' do
-    it 'return true when certificate exists' do
-      subject.certificate = ca
-      expect(subject.active?).to be_truthy
-    end
-  end
+  #describe '#active?' do
+  #  it 'return true when certificate exists' do
+  #    subject.certificate = ca
+  #    expect(subject.active?).to be_truthy
+  #  end
+  #end
 
   describe '#exipred?' do
     it 'return true when certificate is not renew' do

@@ -9,8 +9,8 @@ require "letsencrypt/version"
 Gem::Specification.new do |s|
   s.name        = "rails-letsencrypt"
   s.version     = LetsEncrypt::VERSION
-  s.authors     = ["蒼時弦也"]
-  s.email       = ["elct9620@frost.tw"]
+  s.authors     = ["蒼時弦也", "Liang-Chi Tseng"]
+  s.email       = ["elct9620@frost.tw", "lctseng@5xruby.tw"]
   s.homepage    = "https://github.com/elct9620/rails-letsencrypt"
   s.summary     = "The Let's Encrypt certificate manager for rails"
   s.description = "The Let's Encrypt certificate manager for rails"
@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rails", ">= 4.1"
   s.add_dependency "acme-client"
   s.add_dependency "redis"
+  s.add_dependency "aasm"
 
   s.add_development_dependency "appraisal"
   s.add_development_dependency "rspec-rails"

@@ -14,6 +14,7 @@ module LetsEncrypt
           LetsEncrypt.logger.info "Save #{domain}'s certificate to redis"
           connection.set "#{domain}.key", cert.key
           connection.set "#{domain}.crt", cert.certificate
+          connection.set "#{domain}.status", cert.status
         end
       end
     end

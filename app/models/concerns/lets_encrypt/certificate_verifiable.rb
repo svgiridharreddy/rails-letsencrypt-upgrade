@@ -11,15 +11,13 @@ module LetsEncrypt
       domains.each do |domain|
         if !verify_domain(domain)
           logger.info "Cannot verify domain: #{domain}. Certificate is not verified!"
-          self.verified = false
           save!
-          return
+          return false
         end
       end
-      # Mark as verified
-      self.verified = true
       # Save this certificate
       save!
+      true
     end
 
     # Returns true if verify domain is succeed.
