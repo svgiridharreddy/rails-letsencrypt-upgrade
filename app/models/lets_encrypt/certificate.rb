@@ -68,8 +68,6 @@ module LetsEncrypt
       else
         logger.error "The certificate must be vertified before issued"
         return false
-      else
-        return false
       end
     end
 
