@@ -50,10 +50,10 @@ module LetsEncrypt
       save!
       if verify
         self.state_verify!
-        true
+        return true
       else
         logger.error "The certificate cannot be verified" 
-        false
+        return false
       end
     end
 
