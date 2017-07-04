@@ -7,7 +7,7 @@ module LetsEncrypt
 
 
     def verify
-      domains = [domain] + [alternative_names]
+      domains = [domain] + alternative_names
       domains.each do |domain|
         if !verify_domain(domain)
           logger.info "Cannot verify domain: #{domain}. Certificate is not verified!"

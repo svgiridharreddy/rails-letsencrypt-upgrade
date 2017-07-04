@@ -35,22 +35,24 @@ module LetsEncrypt
 
     before_create -> { self.key = OpenSSL::PKey::RSA.new(4096).to_s }
     after_save -> { save_to_redis }, if: -> { LetsEncrypt.config.use_redis? }
-    
+
     # Returns true if certificate is expired.
     def expired?
       Time.zone.now >= expires_at
     end
 
     def active?
-      self.state_issued && !expired?
+      self.state_issued? && !expired?
     end
 
     def verify!
       self.state_reset
       if verify
         self.state_verify
+        true
       else
         logger.error "The certificate cannot be verified" 
+        false
       end
     end
 
@@ -58,11 +60,16 @@ module LetsEncrypt
       if self.state_verified?
         if issue
           self.state_issue
+          return true
         else
           logger.error "The certificate cannot be issued"  
+          return false
         end
       else
         logger.error "The certificate must be vertified before issued"
+        return false
+      else
+        return false
       end
     end
 
