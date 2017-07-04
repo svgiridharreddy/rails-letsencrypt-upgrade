@@ -46,9 +46,10 @@ module LetsEncrypt
     end
 
     def verify!
-      self.state_reset
+      self.state_reset!
+      save!
       if verify
-        self.state_verify
+        self.state_verify!
         true
       else
         logger.error "The certificate cannot be verified" 
@@ -59,7 +60,7 @@ module LetsEncrypt
     def issue!
       if self.state_verified?
         if issue
-          self.state_issue
+          self.state_issue!
           return true
         else
           logger.error "The certificate cannot be issued"  
