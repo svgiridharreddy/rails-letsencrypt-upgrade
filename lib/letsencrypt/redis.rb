@@ -13,7 +13,7 @@ module LetsEncrypt
         cert.all_domains.each do |domain|
           LetsEncrypt.logger.info "Save #{domain}'s certificate to redis"
           connection.set "certificate-#{domain}.key", cert.key
-          connection.set "certificate-#{domain}.crt", cert.certificate
+          connection.set "certificate-#{domain}.crt", cert.bundle
           connection.set "certificate-#{domain}.status", cert.status
         end
       end
