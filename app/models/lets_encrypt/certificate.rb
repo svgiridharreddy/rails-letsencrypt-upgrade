@@ -81,6 +81,8 @@ module LetsEncrypt
 
     # Returns full-chain bundled certificates
     def bundle
+      return nil unless certificates
+      return nil unless intermediaries
       certificate + intermediaries
     end
 
