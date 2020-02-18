@@ -27,6 +27,7 @@ module LetsEncrypt
       wait_verify_status
       check_verify_status
     rescue Acme::Client::Error => e
+      logger.error "certificate status :- #{self.try(:status)} -- #{e.message}"
       retry_on_verify_error(e)
     end
 
