@@ -22,6 +22,7 @@ module LetsEncrypt
       @challenge = order.authorizations.first.http
       self.verification_path = @challenge.filename
       self.verification_string = @challenge.file_content
+      Redis.save_verify_token(self.verification_path,self.verification_string)
       save!
     end
 

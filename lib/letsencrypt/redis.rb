@@ -8,6 +8,10 @@ module LetsEncrypt
         @connection ||= ::Redis.new(url: LetsEncrypt.config.redis_url)
       end
 
+      def save_verify_token(token, value)
+        connection.set"verification_path.#{token}", value
+      end
+
       # Save certificate into redis.
       def save(cert)
         return unless cert.key.present? && cert.bundle.present?
