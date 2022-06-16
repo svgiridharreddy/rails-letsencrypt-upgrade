@@ -22,7 +22,7 @@ module LetsEncrypt
   #  index_letsencrypt_certificates_on_domain       (domain)
   #  index_letsencrypt_certificates_on_renew_after  (renew_after)
   #
-  class Certificate < ActiveRecord::Base
+  class Certificate < ApplicationRecord
     include CertificateVerifiable
     include CertificateIssuable
     include CertificateStateMachineConcern
